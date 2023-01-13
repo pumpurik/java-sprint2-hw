@@ -27,14 +27,16 @@ public class Checker {
             }
         }
         for (Integer numberMonth : expensesByMonth.keySet()){
-            if (numberMonth==1){
-                nameMonth="Январь";
-            }
-            if (numberMonth==2){
-                nameMonth="Февраль";
-            }
-            if (numberMonth==3){
-                nameMonth="Март";
+            switch (numberMonth){
+                case 1:
+                    nameMonth="Январь";
+                    break;
+                case 2:
+                    nameMonth="Февраль";
+                    break;
+                default:
+                    nameMonth="Март";
+                    break;
             }
             int sumExpenses = monthlyReport.totalMonthlyExpenses(nameMonth);
             if (sumExpenses!= expensesByMonth.get(numberMonth)){
@@ -68,7 +70,6 @@ public class Checker {
             if (sumExpenses!= incomeByMonth.get(numberMonth)){
                 System.out.println("Обнаружено несоответствие по доходам с месяцем " + nameMonth);
                flag = false;
-
             }
         }
         return flag;

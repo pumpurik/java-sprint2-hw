@@ -85,10 +85,8 @@ public class YearlyReport {
         for (String nameYear : reportYear.keySet()){
             System.out.println("Год - " + nameYear);
             profitByMonth(nameYear);
-            System.out.printf("Средний расход за все месяцы в году - " + "%.2f", averageConsumption(nameYear));
-            System.out.println("");
-            System.out.printf("Средний доход за все месяцы в году - " + "%.2f", averageIncome(nameYear));
-            System.out.println("");
+            System.out.println("Средний расход за все месяцы в году - " + String.format("%.2f",averageConsumption(nameYear)));
+            System.out.println("Средний доход за все месяцы в году - " + String.format("%.2f", averageIncome(nameYear)));
         }
     }
 }
