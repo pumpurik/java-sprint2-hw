@@ -57,14 +57,16 @@ public class Checker {
             }
         }
         for (Integer numberMonth : incomeByMonth.keySet()){
-            if (numberMonth==1){
-                nameMonth="Январь";
-            }
-            if (numberMonth==2){
-                nameMonth="Февраль";
-            }
-            if (numberMonth==3){
-                nameMonth="Март";
+            switch (numberMonth){
+                case 1:
+                    nameMonth="Январь";
+                    break;
+                case 2:
+                    nameMonth="Февраль";
+                    break;
+                default:
+                    nameMonth="Март";
+                    break;
             }
             int sumExpenses = monthlyReport.totalMonthlyIncome(nameMonth);
             if (sumExpenses!= incomeByMonth.get(numberMonth)){
