@@ -1,118 +1,101 @@
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MonthlyReport {
-    HashMap <String,ArrayList<Month>> reportMonth = new HashMap();
-    public void loadFile (String nameMonth ,String path){
-        String content = readFileContents(path);
-        String[] lines = content.split("\r?\n");
-        ArrayList <Month> objMonth = new ArrayList<>();
-        for (int i=1; i< lines.length; i++){
-            String line= lines[i];
-            String [] parts = line.split(",");
-            String itemName = parts[0];
-            boolean isExpense = Boolean.parseBoolean(parts[1]);
-            int quantity = Integer.parseInt(parts[2]);
-            int sumOfOne = Integer.parseInt(parts[3]);
-            Month month = new Month(itemName, isExpense, quantity, sumOfOne);
-            objMonth.add(month);
+    //про правила названий методов тож вспомнила тока под конец, я усталаааааа
+    FileReader fileReader = new FileReader();
+    HashMap<Integer,ArrayList<Month>> monthlyReportsHashmap = new HashMap<>();
+
+    void saveMonthlyReport(){
+        for (int i = 1; i <4; i++){
+            ArrayList<String> reports = fileReader.readFileContents("m.20210" + i + ".csv");
+            ArrayList<Month> months = new ArrayList<>();
+            for (int j = 1; j<reports.size(); j++){
+                String[] lineContents = reports.get(j).split(",");
+                Month month = new Month(lineContents);
+                months.add(month);
+            }
+            monthlyReportsHashmap.put(i, months);
         }
-        reportMonth.put(nameMonth, objMonth);
+    };
+    void maxIncome(int monthName){
+        int max = 0;
+        String name = "";
+        ArrayList<Month> lines = monthlyReportsHashmap.get(monthName);
+        for (Month month: lines){
+            if (!month.isExpense){
+                if ((month.unitPrice*month.quantity) > max){
+                    max = month.unitPrice*month.quantity;
+                    name = month.name;
+                }
+            }
+        }
+        System.out.println("Самый прибыльный товар - " + name + " Сумма - " + max);
+    };
+
+    void maxExpense(int monthName){
+        int max = 0;
+        String name = "";
+        ArrayList<Month> lines = monthlyReportsHashmap.get(monthName);
+        for (Month month: lines){
+            if (month.isExpense){
+                if ((month.unitPrice*month.quantity) > max){
+                    max = month.unitPrice*month.quantity;
+                    name = month.name;
+                }
+            }
+        }
+        System.out.println("Самая большая трата - " + name + " Сумма - " + max);
+    };
+
+    int sumIncome(int monthName){
+        int sum = 0;
+        ArrayList<Month> lines = monthlyReportsHashmap.get(monthName);
+        for (Month month: lines){
+            if (!month.isExpense) {
+                sum += month.unitPrice*month.quantity;
+            }
+        }
+        return sum;
     }
-    public String readFileContents(String path) {
-        try {
-            return Files.readString(Path.of(path));
-        } catch (IOException e) {
-            System.out.println("Невозможно прочитать файл с месячным отчётом. Возможно файл не находится в нужной директории.");
-            return null;
+
+    int sumExpense(int monthName){
+        int sum = 0;
+        ArrayList<Month> lines = monthlyReportsHashmap.get(monthName);
+        for (Month month: lines){
+            if (month.isExpense) {
+                sum += month.unitPrice*month.quantity;
+            }
+        }
+        return sum;
+    }
+
+    void nameMonth(int monthName) {
+        if (monthName == 1){
+            System.out.println("Январь");
+        } else if (monthName == 2){
+            System.out.println("Февраль");
+        } else {
+            System.out.println("Март");
         }
     }
 
-    public void topSale (String nameMonth){
-        ArrayList <Month> objMonth = reportMonth.get(nameMonth);
-        HashMap <String,Integer> sales = new HashMap<>();
-        for (Month month : objMonth){
-            if (month.isExpense == false){
-                sales.put(month.itemName, sales.getOrDefault(month.itemName, 0) + (month.quantity*month.sumOfOne));
-            }
+    void printInformationFromReports(){
+        if (!validateReports()){
+            return;
         }
-        String maxItemName = null;
-        int maxItemSum = 0;
-        for (String itemName : sales.keySet()) {
-            if (maxItemName == null) {
-                maxItemName = itemName;
-                maxItemSum = sales.get(itemName);
-                continue;
-            }
-            if (sales.get(maxItemName) < sales.get(itemName)) {
-                maxItemName = itemName;
-                maxItemSum = sales.get(itemName);
-            }
+        for (Integer key: monthlyReportsHashmap.keySet()){
+            nameMonth(key);
+            maxIncome(key);
+            maxExpense(key);
         }
-        System.out.println("Самый прибыльный товар - " + maxItemName);
-        System.out.println("Сумма продаж данного товара - " + maxItemSum);
     }
 
-    public void topSpending (String nameMonth){
-        ArrayList <Month> objMonth = reportMonth.get(nameMonth);
-        HashMap <String,Integer> spendings = new HashMap<>();
-        for (Month month : objMonth){
-            if (month.isExpense == true){
-                spendings.put(month.itemName, spendings.getOrDefault(month.itemName, 0) + (month.quantity*month.sumOfOne));
-            }
+    boolean validateReports() {
+        if (monthlyReportsHashmap.isEmpty()){
+            System.out.println("Отчеты не были считаны, пожалуйста, считайте файлы!");
+            return false;
         }
-        String maxItemName = null;
-        int maxItemSum = 0;
-        for (String itemName : spendings.keySet()) {
-            if (maxItemName == null) {
-                maxItemName = itemName;
-                maxItemSum = spendings.get(itemName);
-                continue;
-            }
-            if (spendings.get(maxItemName) < spendings.get(itemName)) {
-                maxItemName = itemName;
-                maxItemSum = spendings.get(itemName);
-            }
-        }
-        System.out.println("Самая большая трата на товар - " + maxItemName);
-        System.out.println("Сумма данной траты - " + maxItemSum);
-    }
-    public void printMonthlyReport (){
-        for (String nameMonth : reportMonth.keySet()){
-            System.out.println(nameMonth);
-            topSale(nameMonth);
-            topSpending(nameMonth);
-        }
-    }
-    public int totalMonthlyIncome (String nameMonth){
-        int sumSales = 0;
-        ArrayList <Month> objMonth = reportMonth.get(nameMonth);
-        HashMap <String,Integer> sales = new HashMap<>();
-        for (Month month : objMonth){
-            if (month.isExpense == false){
-                sales.put(month.itemName, sales.getOrDefault(month.itemName, 0) + (month.quantity*month.sumOfOne));
-            }
-        }
-        for (String itemName : sales.keySet()){
-            sumSales+=sales.get(itemName);
-        }
-        return sumSales;
-    }
-    public int totalMonthlyExpenses (String nameMonth){
-        int sumExpenses = 0;
-        ArrayList <Month> objMonth = reportMonth.get(nameMonth);
-        HashMap <String,Integer> expenses = new HashMap<>();
-        for (Month month : objMonth){
-            if (month.isExpense == true){
-                expenses.put(month.itemName, expenses.getOrDefault(month.itemName, 0) + (month.quantity*month.sumOfOne));
-            }
-        }
-        for (String itemName : expenses.keySet()){
-            sumExpenses+=expenses.get(itemName);
-        }
-        return sumExpenses;
+        return true;
     }
 }

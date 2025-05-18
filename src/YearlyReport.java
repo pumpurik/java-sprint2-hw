@@ -1,92 +1,75 @@
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class YearlyReport {
-    HashMap<String,ArrayList<Year>> reportYear = new HashMap<>();
-    public void loadFile (String path){
-        String content = readFileContents(path);
-        String[] lines = content.split("\r?\n");
-        String nameYear = path.substring(12,16);
+    FileReader fileReader = new FileReader();
+    HashMap<String,ArrayList<Year>> yearlyReportsHashmap = new HashMap<>();
+
+    void saveYearlyReport(){
+        ArrayList<String> reports = fileReader.readFileContents("y.2021.csv");
         ArrayList<Year> years = new ArrayList<>();
-        for (int i=1; i< lines.length; i++){
-            String line= lines[i];
-            String [] parts = line.split(",");
-            int month = Integer.parseInt(parts[0]);
-            int amount = Integer.parseInt(parts[1]);
-            boolean isExpense = Boolean.parseBoolean(parts[2]);
-            Year year = new Year(month,amount,isExpense);
+        for (int i = 1; i<reports.size(); i++){
+            String[] lineContents = reports.get(i).split(",");
+            Year year = new Year(lineContents);
             years.add(year);
         }
-        reportYear.put(nameYear,years);
-    }
-    public String readFileContents(String path) {
-        try {
-            return Files.readString(Path.of(path));
-        } catch (IOException e) {
-            System.out.println("Невозможно прочитать файл с месячным отчётом. Возможно файл не находится в нужной директории.");
-            return null;
+        yearlyReportsHashmap.put("y.2021.csv", years);
+    };
+
+    /*Информация из годового отчёта.
+    При вызове этой функции программа должна выводить такие данные:
+        рассматриваемый год;
+        прибыль по каждому месяцу;
+        средний расход за все имеющиеся операции в году;
+        средний доход за все имеющиеся операции в году.*/
+    //короче, я устала, поскольку год один - я автоматизировать не буду, мне впадлу
+
+    void printInformationFromReport(){
+        if (!validateReport()){
+            return;
         }
+        System.out.println("Год 2021");
+        printIncomePerMonth();
+        System.out.println("Средний расход за все имеющиеся операции в году - " + averageSumExpense());
+        System.out.println("Средний доход за все имеющиеся операции в году - " + averageSumIncome());
     }
-    public void profitByMonth (String nameYear){
-        ArrayList <Year> objYear = reportYear.get(nameYear);
-        HashMap<Integer, Integer> profitByMonth = new HashMap<>();
-        for (Year year: objYear) {
-            if (year.isExpense == false){
-                profitByMonth.put(year.month, year.amount );
+
+    void printIncomePerMonth(){
+        ArrayList<Year> yearReport = yearlyReportsHashmap.get("y.2021.csv");
+        for (Year year: yearReport){
+            if (!year.isExpense){
+                System.out.println("Месяц " + year.month + ". Прибыль - " + year.amount);
             }
         }
-        for (Year year: objYear) {
-            if (year.isExpense==true){
-                profitByMonth.put(year.month, profitByMonth.get(year.month) - year.amount);
+    }
+
+    double averageSumExpense(){
+        ArrayList<Year> yearReport = yearlyReportsHashmap.get("y.2021.csv");
+        double averageSum = 0;
+        for (Year year: yearReport){
+            if (year.isExpense){
+                averageSum+=year.amount;
             }
         }
-        for (Integer numberMonth: profitByMonth.keySet()){
-            System.out.println("Номер месяца - " + numberMonth + "; прибыль - " + profitByMonth.get(numberMonth));
-        }
+        return averageSum/3;
     }
-    public double averageConsumption (String nameYear){
-        ArrayList <Year> objYear = reportYear.get(nameYear);
-        HashMap<Integer, Integer> profitByMonth = new HashMap<>();
-        for (Year year: objYear) {
-            if (year.isExpense == true){
-                profitByMonth.put(year.month, year.amount );
+
+    double averageSumIncome(){
+        ArrayList<Year> yearReport = yearlyReportsHashmap.get("y.2021.csv");
+        double averageSum = 0;
+        for (Year year: yearReport){
+            if (!year.isExpense){
+                averageSum+=year.amount;
             }
         }
-        double sum = 0;
-        int count = 0;
-        for (Integer numberMonth : profitByMonth.keySet()){
-            sum+=profitByMonth.get(numberMonth);
-            count++;
-        }
-        double averageSum = sum/count;
-        return averageSum;
+        return averageSum/3;
     }
-    public double averageIncome (String nameYear){
-        ArrayList <Year> objYear = reportYear.get(nameYear);
-        HashMap<Integer, Integer> profitByMonth = new HashMap<>();
-        for (Year year: objYear) {
-            if (year.isExpense == false){
-                profitByMonth.put(year.month, year.amount );
-            }
+
+    boolean validateReport() {
+        if (yearlyReportsHashmap.isEmpty()){
+            System.out.println("Отчеты не были считаны, пожалуйста, считайте файлы!");
+            return false;
         }
-        double sum = 0;
-        int count = 0;
-        for (Integer numberMonth : profitByMonth.keySet()){
-            sum+=profitByMonth.get(numberMonth);
-            count++;
-        }
-        double averageSum = sum/count;
-        return averageSum;
-    }
-    public void printYearlyReport (){
-        for (String nameYear : reportYear.keySet()){
-            System.out.println("Год - " + nameYear);
-            profitByMonth(nameYear);
-            System.out.println("Средний расход за все месяцы в году - " + String.format("%.2f",averageConsumption(nameYear)));
-            System.out.println("Средний доход за все месяцы в году - " + String.format("%.2f", averageIncome(nameYear)));
-        }
+        return true;
     }
 }

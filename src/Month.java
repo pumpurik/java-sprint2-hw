@@ -1,14 +1,13 @@
 public class Month {
-    String itemName;
+    String name;
     boolean isExpense;
     int quantity;
-    int sumOfOne;
+    int unitPrice;
 
-
-    public Month(String itemName, boolean isExpense, int quantity, int sumOfOne) {
-        this.itemName = itemName;
-        this.isExpense = isExpense;
-        this.quantity = quantity;
-        this.sumOfOne = sumOfOne;
+    Month(String [] lines){
+        name = lines[0];
+        isExpense = Boolean.parseBoolean(lines[1]);
+        quantity = Integer.parseInt(lines[2]);
+        unitPrice = Integer.parseInt(lines[3]);
     }
 }

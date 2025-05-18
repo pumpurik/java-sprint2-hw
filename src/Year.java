@@ -3,11 +3,9 @@ public class Year {
     int amount;
     boolean isExpense;
 
-
-    public Year(int month, int amount, boolean isExpense) {
-        this.month = month;
-        this.amount = amount;
-        this.isExpense = isExpense;
-
+    Year(String[] line){
+        month = Integer.parseInt(line[0]);
+        amount = Integer.parseInt(line[1]);
+        isExpense = Boolean.parseBoolean(line[2]);
     }
 }
